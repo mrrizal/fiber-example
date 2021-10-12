@@ -9,6 +9,7 @@ import (
 type configs struct {
 	DatabaseURL string
 	PageSize    int
+	SecretKey   string
 }
 
 var Configs configs
@@ -20,4 +21,5 @@ func GetSettings() {
 		log.Panic(err)
 	}
 	Configs.PageSize = pageSize
+	Configs.SecretKey = os.Getenv("SECRET_KEY")
 }
