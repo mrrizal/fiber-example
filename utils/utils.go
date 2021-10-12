@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
 	"strconv"
 )
@@ -40,4 +41,12 @@ func (c *Hash) Compare(hash string, s string) error {
 	incoming := []byte(s)
 	existing := []byte(hash)
 	return bcrypt.CompareHashAndPassword(existing, incoming)
+}
+
+func ErrorResponse(c *fiber.Ctx, statusCode int, err error) error {
+	c.Status(statusCode)
+	resp := struct {
+		Message string `json:"message"`
+	}{Message: err.Error()}
+	return c.JSON(resp)
 }
