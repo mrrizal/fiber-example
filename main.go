@@ -31,8 +31,7 @@ func main() {
 	flag.Parse()
 
 	if *migrate {
-		database.DBConn.AutoMigrate(&book.Book{})
-		database.DBConn.AutoMigrate(&user.User{})
+		database.DBConn.AutoMigrate(&user.User{}, &book.Book{})
 		log.Info("Database migrated.")
 	} else {
 		app := fiber.New()
