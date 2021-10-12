@@ -4,9 +4,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	log "github.com/sirupsen/logrus"
-
-	"github.com/mrrizal/fiber-example/database"
 	"github.com/mrrizal/fiber-example/utils"
 )
 
@@ -18,15 +15,12 @@ func GetBooksHandler(c *fiber.Ctx) error {
 
 	id, err := utils.GetIDFromURLQuery(next, previous, &previousPage)
 	if err != nil {
-		log.Error(err.Error())
-		c.Status(500)
-		return nil
+		return utils.ErrorResponse(c, 500, err)
 	}
 
 	books, err := getBooks(id, previousPage)
 	if err != nil {
-		log.Error(err)
-		return c.JSON([]Book{})
+		return utils.ErrorResponse(c, 500, err)
 	}
 	booksResponse := booksToResponse(c, books)
 	return c.JSON(booksResponse)
@@ -35,16 +29,12 @@ func GetBooksHandler(c *fiber.Ctx) error {
 func GetBookHandler(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		log.Error(err.Error())
-		c.Status(500)
-		return c.JSON(nil)
+		return utils.ErrorResponse(c, 500, err)
 	}
 
 	book, err := getBook(id)
 	if err != nil {
-		log.Error(err)
-		c.Status(404)
-		return c.JSON(nil)
+		return utils.ErrorResponse(c, 404, err)
 	}
 	return c.JSON(book)
 }
@@ -52,14 +42,13 @@ func GetBookHandler(c *fiber.Ctx) error {
 func NewBookHandler(c *fiber.Ctx) error {
 	book := new(Book)
 	if err := c.BodyParser(book); err != nil {
-		c.Status(400)
-		return c.JSON(err.Error())
+		return utils.ErrorResponse(c, 400, err)
 	}
 
-	if err := database.DBConn.Create(&book).Error; err != nil {
-		c.Status(500)
-		return c.JSON(err.Error())
+	if err := newBook(book); err != nil {
+		return utils.ErrorResponse(c, 500, err)
 	}
+
 	c.Status(201)
 	return c.JSON(book)
 }
@@ -68,21 +57,15 @@ func DeleteBookHandler(c *fiber.Ctx) error {
 	var book Book
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		log.Error(err.Error())
-		c.Status(500)
-		return c.JSON(nil)
+		return utils.ErrorResponse(c, 500, err)
 	}
 
-	if err := database.DBConn.First(&book, id).Error; err != nil {
-		log.Error(err.Error())
-		c.Status(404)
-		return c.JSON(nil)
+	if book, err = getBook(id); err != nil {
+		return utils.ErrorResponse(c, 404, err)
 	}
 
-	if err := database.DBConn.Delete(&book).Error; err != nil {
-		log.Error(err.Error())
-		c.Status(500)
-		return c.JSON(nil)
+	if err := deleteBook(&book); err != nil {
+		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(204)
 	return c.JSON(nil)
