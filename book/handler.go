@@ -1,11 +1,13 @@
 package book
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/mrrizal/fiber-example/database"
 	"github.com/mrrizal/fiber-example/utils"
-	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
 func GetBooksHandler(c *fiber.Ctx) error {
