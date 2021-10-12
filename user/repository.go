@@ -2,12 +2,11 @@ package user
 
 import (
 	"github.com/mrrizal/fiber-example/database"
-	"github.com/mrrizal/fiber-example/utils"
 )
 
-func SingUp(user *User) error {
-	hash := utils.Hash{}
-	generatedPassword, err := hash.Generate(user.Password)
+func singUp(user *User) error {
+	hash := hash{}
+	generatedPassword, err := hash.generate(user.Password)
 	if err != nil {
 		return err
 	}
@@ -17,4 +16,18 @@ func SingUp(user *User) error {
 		return err
 	}
 	return nil
+}
+
+func login(username, password string) (User, error) {
+	var user User
+	if err := database.DBConn.Where("username = ?", username).First(&user).Error; err != nil {
+		return User{}, err
+	}
+
+	hash := hash{}
+	err := hash.compare(user.Password, password)
+	if err != nil {
+		return User{}, err
+	}
+	return user, nil
 }
