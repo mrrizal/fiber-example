@@ -53,10 +53,10 @@ func NewBookHandler(c *fiber.Ctx) error {
 		c.Status(400)
 		return c.JSON(err.Error())
 	}
+
 	if err := database.DBConn.Create(&book).Error; err != nil {
 		c.Status(500)
 		return c.JSON(err.Error())
-
 	}
 	c.Status(201)
 	return c.JSON(book)

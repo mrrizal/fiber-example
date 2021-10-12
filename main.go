@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mrrizal/fiber-example/book"
 	"github.com/mrrizal/fiber-example/routes"
+	"github.com/mrrizal/fiber-example/user"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/mrrizal/fiber-example/configs"
@@ -31,6 +32,7 @@ func main() {
 
 	if *migrate {
 		database.DBConn.AutoMigrate(&book.Book{})
+		database.DBConn.AutoMigrate(&user.User{})
 		log.Info("Database migrated.")
 	} else {
 		app := fiber.New()
