@@ -11,7 +11,7 @@ func SignUpHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	if err := SingUp(&user); err != nil {
+	if err := singUp(&user); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(201)
@@ -28,14 +28,19 @@ func LoginHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
-	if err := Login(userCredentials.Username, userCredentials.Password); err != nil {
+	user, err := login(userCredentials.Username, userCredentials.Password)
+	if err != nil {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
+	token, err := generateJWTToken(user)
+	if err != nil {
+		return utils.ErrorResponse(c, 500, err)
+	}
 	response := struct {
-		Message string `json:"message"`
+		Token string `json:"token"`
 	}{}
-	response.Message = "Login success"
+	response.Token = token
 	c.Status(200)
 	return c.JSON(response)
 }
