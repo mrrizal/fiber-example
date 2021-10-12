@@ -2,29 +2,17 @@ package user
 
 import (
 	"github.com/gofiber/fiber/v2"
-
-	"github.com/mrrizal/fiber-example/database"
 	"github.com/mrrizal/fiber-example/utils"
 )
 
 func SignUpHandler(c *fiber.Ctx) error {
 	var user User
 	if err := c.BodyParser(&user); err != nil {
-		c.Status(400)
-		return c.JSON(err.Error())
+		return utils.ErrorResponse(c, 500, err)
 	}
 
-	hash := utils.Hash{}
-	generatedPassword, err := hash.Generate(user.Password)
-	if err != nil {
-		c.Status(500)
-		return c.JSON(err.Error())
-	}
-	user.Password = generatedPassword
-
-	if err := database.DBConn.Create(&user).Error; err != nil {
-		c.Status(500)
-		return c.JSON(err.Error())
+	if err := SingUp(&user); err != nil {
+		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(201)
 	return c.JSON(UserResponse(user))
@@ -37,14 +25,17 @@ func LoginHandler(c *fiber.Ctx) error {
 	}{}
 
 	if err := c.BodyParser(&userCredentials); err != nil {
-		c.Status(400)
-		return c.JSON(err.Error())
+		return utils.ErrorResponse(c, 400, err)
 	}
 
 	if err := Login(userCredentials.Username, userCredentials.Password); err != nil {
-		c.Status(400)
-		return c.JSON(err.Error())
+		return utils.ErrorResponse(c, 400, err)
 	}
 
-	return c.JSON(userCredentials)
+	response := struct {
+		Message string `json:"message"`
+	}{}
+	response.Message = "Login success"
+	c.Status(200)
+	return c.JSON(response)
 }
