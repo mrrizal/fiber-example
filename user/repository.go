@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/mrrizal/fiber-example/database"
+	"strings"
 )
 
 func singUp(user *User) error {
@@ -12,6 +13,7 @@ func singUp(user *User) error {
 	}
 	user.Password = generatedPassword
 
+	user.Username = strings.ToLower(user.Username)
 	if err := database.DBConn.Create(&user).Error; err != nil {
 		return err
 	}
@@ -20,7 +22,7 @@ func singUp(user *User) error {
 
 func login(username, password string) (User, error) {
 	var user User
-	if err := database.DBConn.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := database.DBConn.Where("username = ?", strings.ToLower(username)).First(&user).Error; err != nil {
 		return User{}, err
 	}
 

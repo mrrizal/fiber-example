@@ -1,6 +1,7 @@
 package book
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -67,6 +68,15 @@ func DeleteBookHandler(c *fiber.Ctx) error {
 
 	if book, err = getBook(id); err != nil {
 		return utils.ErrorResponse(c, 404, err)
+	}
+
+	authorID, err := utils.ValidateJWTToken(c)
+	if err != nil {
+		return utils.ErrorResponse(c, 500, err)
+	}
+
+	if uint(authorID) != book.AuthorID {
+		return utils.ErrorResponse(c, 403, errors.New("You don't have access to do this action."))
 	}
 
 	if err := deleteBook(&book); err != nil {
