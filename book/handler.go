@@ -13,7 +13,7 @@ func GetBooksHandler(c *fiber.Ctx) error {
 	previous := c.Query("previous")
 	previousPage := false
 
-	id, err := utils.GetIDFromURLQuery(next, previous, &previousPage)
+	id, err := getIDFromURLQuery(next, previous, &previousPage)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
@@ -45,6 +45,11 @@ func NewBookHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
+	authorID, err := utils.ValidateJWTToken(c)
+	if err != nil {
+		return utils.ErrorResponse(c, 500, err)
+	}
+	book.AuthorID = uint(authorID)
 	if err := newBook(book); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
