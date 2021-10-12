@@ -49,3 +49,17 @@ func getBook(id int) (Book, error) {
 	}
 	return book, nil
 }
+
+func newBook(book *Book) error {
+	if err := database.DBConn.Create(&book).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func deleteBook(book *Book) error {
+	if err := database.DBConn.Delete(&book).Error; err != nil {
+		return err
+	}
+	return nil
+}
