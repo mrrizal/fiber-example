@@ -5,7 +5,14 @@ import (
 	"strings"
 )
 
-func singUp(user *User) error {
+type Service interface {
+	singUp(user *User) error
+	login(username, password string) (User, error)
+}
+
+type ServiceStruct struct{}
+
+func (s *ServiceStruct) singUp(user *User) error {
 	hash := hash{}
 	generatedPassword, err := hash.generate(user.Password)
 	if err != nil {
@@ -20,7 +27,7 @@ func singUp(user *User) error {
 	return nil
 }
 
-func login(username, password string) (User, error) {
+func (s *ServiceStruct) login(username, password string) (User, error) {
 	var user User
 	if err := database.DBConn.Where("username = ?", strings.ToLower(username)).First(&user).Error; err != nil {
 		return User{}, err
