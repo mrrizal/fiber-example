@@ -37,6 +37,7 @@ func (s *bookServiceStructFake) getBooks(id int, previousPage bool) ([]Book, err
 func (s *bookServiceStructFake) getBook(id int) (Book, error) {
 	var book Book
 	err := faker.FakeData(&book)
+	book.AuthorID = 1
 	if err != nil {
 		return book, err
 	}
@@ -170,6 +171,52 @@ func TestNewBookHandler(t *testing.T) {
 		}
 
 		assert.NotEqual(t, 200, response.StatusCode)
+	})
+}
+
+func TestDeleteBookHandler(t *testing.T) {
+	bookService := &bookServiceStructFake{}
+	app := setup(bookService)
+
+	t.Run("without auth", func(t *testing.T) {
+		request := httptest.NewRequest(http.MethodDelete, "/api/v1/book/1", nil)
+		response, err := app.Test(request)
+		if err != nil {
+			t.Error(err.Error())
+		}
+		assert.NotEqual(t, 200, response.StatusCode)
+	})
+
+	t.Run("with auth", func(t *testing.T) {
+		var testUser user.User
+		testUser.ID = 1
+		testUser.Username = "test"
+
+		token, _ := user.GenerateJWTToken(testUser)
+		request := httptest.NewRequest(http.MethodDelete, "/api/v1/book/1", nil)
+		request.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
+		response, err := app.Test(request)
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		assert.Equal(t, 204, response.StatusCode)
+	})
+
+	t.Run("author id != user id", func(t *testing.T) {
+		var testUser user.User
+		testUser.ID = 2
+		testUser.Username = "test"
+
+		token, _ := user.GenerateJWTToken(testUser)
+		request := httptest.NewRequest(http.MethodDelete, "/api/v1/book/1", nil)
+		request.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
+		response, err := app.Test(request)
+		if err != nil {
+			t.Error(err.Error())
+		}
+
+		assert.Equal(t, 403, response.StatusCode)
 	})
 }
 
