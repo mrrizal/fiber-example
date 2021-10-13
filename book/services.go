@@ -6,6 +6,15 @@ import (
 	"github.com/mrrizal/fiber-example/database"
 )
 
+type Service interface {
+	getBooks(id int, previousPage bool) ([]Book, error)
+	getBook(id int) (Book, error)
+	newBook(book *Book) error
+	deleteBook(book *Book) error
+}
+
+type ServiceStruct struct{}
+
 func booksQueryBuilder(id int, previousPage bool, tableName string) string {
 	query := ""
 	operator := "<"
@@ -24,7 +33,7 @@ func booksQueryBuilder(id int, previousPage bool, tableName string) string {
 	return query
 }
 
-func getBooks(id int, previousPage bool) ([]Book, error) {
+func (s *ServiceStruct) getBooks(id int, previousPage bool) ([]Book, error) {
 	var books []Book
 
 	query := booksQueryBuilder(id, previousPage, "books")
@@ -33,7 +42,7 @@ func getBooks(id int, previousPage bool) ([]Book, error) {
 	}
 
 	if previousPage {
-		previousBooks := []Book{}
+		var previousBooks []Book
 		for i := len(books) - 1; i >= 0; i-- {
 			previousBooks = append(previousBooks, books[i])
 		}
@@ -42,7 +51,7 @@ func getBooks(id int, previousPage bool) ([]Book, error) {
 	return books, nil
 }
 
-func getBook(id int) (Book, error) {
+func (s *ServiceStruct) getBook(id int) (Book, error) {
 	var book Book
 	if err := database.DBConn.Where("id = ?", id).First(&book).Error; err != nil {
 		return book, err
@@ -50,14 +59,14 @@ func getBook(id int) (Book, error) {
 	return book, nil
 }
 
-func newBook(book *Book) error {
+func (s *ServiceStruct) newBook(book *Book) error {
 	if err := database.DBConn.Create(&book).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func deleteBook(book *Book) error {
+func (s *ServiceStruct) deleteBook(book *Book) error {
 	if err := database.DBConn.Delete(&book).Error; err != nil {
 		return err
 	}

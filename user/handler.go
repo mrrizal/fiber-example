@@ -33,7 +33,7 @@ func LoginHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
-	token, err := generateJWTToken(user)
+	token, err := GenerateJWTToken(user)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
