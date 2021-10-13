@@ -26,7 +26,7 @@ func (c *hash) compare(hash string, s string) error {
 	return bcrypt.CompareHashAndPassword(existing, incoming)
 }
 
-func generateJWTToken(user User) (string, error) {
+func GenerateJWTToken(user User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["id"] = user.ID
