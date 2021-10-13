@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"github.com/mrrizal/fiber-example/book"
 	"github.com/mrrizal/fiber-example/routes"
 	"github.com/mrrizal/fiber-example/user"
 	log "github.com/sirupsen/logrus"
+	"go.elastic.co/apm/module/apmfiber"
 
 	"github.com/mrrizal/fiber-example/configs"
 	"github.com/mrrizal/fiber-example/database"
@@ -23,6 +25,7 @@ func loadEnvFile() {
 
 func setup(bookService book.Service, userService user.Service) *fiber.App {
 	app := fiber.New()
+	app.Use(apmfiber.Middleware())
 	routes.SetupRoutes(app, bookService, userService)
 	return app
 }
