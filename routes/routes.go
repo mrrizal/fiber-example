@@ -6,15 +6,7 @@ import (
 	"github.com/mrrizal/fiber-example/user"
 )
 
-func SetupUserRoutes(app *fiber.App) {
-	api := app.Group("/api")
-
-	v1 := api.Group("/v1")
-
-	v1.Post("/user/sign-up", user.SignUpHandler)
-	v1.Post("/user/login", user.LoginHandler)
-}
-func SetupRoutes(app *fiber.App, s book.Service) {
-	SetupUserRoutes(app)
-	book.SetupBookRoutes(app, s)
+func SetupRoutes(app *fiber.App, bookService book.Service, userService user.Service) {
+	book.SetupBookRoutes(app, bookService)
+	user.SetupUserRoutes(app, userService)
 }
