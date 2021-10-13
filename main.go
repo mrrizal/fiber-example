@@ -21,9 +21,9 @@ func loadEnvFile() {
 	log.Info("Successful load .env file")
 }
 
-func setup(bookService book.Service) *fiber.App {
+func setup(bookService book.Service, userService user.Service) *fiber.App {
 	app := fiber.New()
-	routes.SetupRoutes(app, bookService)
+	routes.SetupRoutes(app, bookService, userService)
 	return app
 }
 
@@ -40,7 +40,7 @@ func main() {
 		database.DBConn.AutoMigrate(&user.User{}, &book.Book{})
 		log.Info("Database migrated.")
 	} else {
-		app := setup(&book.ServiceStruct{})
+		app := setup(&book.ServiceStruct{}, &user.ServiceStruct{})
 		app.Listen("0.0.0.0:3000")
 	}
 }
