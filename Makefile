@@ -8,3 +8,6 @@ test:
 	go clean -cache
 	go test -cover github.com/mrrizal/fiber-example/book
 	go test -cover github.com/mrrizal/fiber-example/user
+
+build:
+	docker build -t mrrizal/fiber-example .
