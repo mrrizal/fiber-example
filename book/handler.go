@@ -8,7 +8,10 @@ import (
 	"github.com/mrrizal/fiber-example/utils"
 )
 
-func GetBooksHandler(c *fiber.Ctx) error {
+type BookService interface {
+}
+
+func GetBooksHandler(c *fiber.Ctx, s Service) error {
 	var id int
 	next := c.Query("next")
 	previous := c.Query("previous")
@@ -19,7 +22,7 @@ func GetBooksHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	books, err := getBooks(id, previousPage)
+	books, err := s.getBooks(id, previousPage)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
@@ -27,21 +30,22 @@ func GetBooksHandler(c *fiber.Ctx) error {
 	return c.JSON(booksResponse)
 }
 
-func GetBookHandler(c *fiber.Ctx) error {
+func GetBookHandler(c *fiber.Ctx, s Service) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	book, err := getBook(id)
+	book, err := s.getBook(id)
 	if err != nil {
 		return utils.ErrorResponse(c, 404, err)
 	}
 	return c.JSON(book)
 }
 
-func NewBookHandler(c *fiber.Ctx) error {
+func NewBookHandler(c *fiber.Ctx, s Service) error {
 	book := new(Book)
+
 	if err := c.BodyParser(book); err != nil {
 		return utils.ErrorResponse(c, 400, err)
 	}
@@ -50,8 +54,9 @@ func NewBookHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
+
 	book.AuthorID = uint(authorID)
-	if err := newBook(book); err != nil {
+	if err := s.newBook(book); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
@@ -59,14 +64,14 @@ func NewBookHandler(c *fiber.Ctx) error {
 	return c.JSON(book)
 }
 
-func DeleteBookHandler(c *fiber.Ctx) error {
+func DeleteBookHandler(c *fiber.Ctx, s Service) error {
 	var book Book
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	if book, err = getBook(id); err != nil {
+	if book, err = s.getBook(id); err != nil {
 		return utils.ErrorResponse(c, 404, err)
 	}
 
@@ -79,7 +84,7 @@ func DeleteBookHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 403, errors.New("You don't have access to do this action."))
 	}
 
-	if err := deleteBook(&book); err != nil {
+	if err := s.deleteBook(&book); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(204)
