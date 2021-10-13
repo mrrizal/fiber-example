@@ -1,24 +1,29 @@
 package user
 
 import (
+	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizal/fiber-example/utils"
 )
 
-func SignUpHandler(c *fiber.Ctx) error {
+func SignUpHandler(c *fiber.Ctx, s Service) error {
 	var user User
 	if err := c.BodyParser(&user); err != nil {
-		return utils.ErrorResponse(c, 500, err)
+		return utils.ErrorResponse(c, 400, err)
 	}
 
-	if err := singUp(&user); err != nil {
+	if user.Password == "" {
+		return utils.ErrorResponse(c, 400, errors.New("password cannot be empty"))
+	}
+
+	if err := s.singUp(&user); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(201)
 	return c.JSON(UserResponse(user))
 }
 
-func LoginHandler(c *fiber.Ctx) error {
+func LoginHandler(c *fiber.Ctx, s Service) error {
 	userCredentials := struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -28,7 +33,11 @@ func LoginHandler(c *fiber.Ctx) error {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
-	user, err := login(userCredentials.Username, userCredentials.Password)
+	if userCredentials.Username == "" || userCredentials.Password == "" {
+		return utils.ErrorResponse(c, 400, errors.New("username and password is required"))
+	}
+
+	user, err := s.login(userCredentials.Username, userCredentials.Password)
 	if err != nil {
 		return utils.ErrorResponse(c, 400, err)
 	}
