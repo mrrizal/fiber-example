@@ -1,20 +1,24 @@
 package user
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizal/fiber-example/database"
+	"go.elastic.co/apm"
 	"strings"
 )
 
 type Service interface {
-	singUp(user *User) error
-	login(username, password string) (User, error)
+	singUp(c *fiber.Ctx, user *User) error
+	login(c *fiber.Ctx, username, password string) (User, error)
 }
 
 type ServiceStruct struct{}
 
-func (s *ServiceStruct) singUp(user *User) error {
+func (s *ServiceStruct) singUp(c *fiber.Ctx, user *User) error {
+	span, _ := apm.StartSpan(c.Context(), "singUp", "postgres")
+	defer span.End()
 	hash := hash{}
-	generatedPassword, err := hash.generate(user.Password)
+	generatedPassword, err := hash.generatePassword(c, user.Password)
 	if err != nil {
 		return err
 	}
@@ -27,14 +31,16 @@ func (s *ServiceStruct) singUp(user *User) error {
 	return nil
 }
 
-func (s *ServiceStruct) login(username, password string) (User, error) {
+func (s *ServiceStruct) login(c *fiber.Ctx, username, password string) (User, error) {
+	span, _ := apm.StartSpan(c.Context(), "login", "postgres")
+	defer span.End()
 	var user User
 	if err := database.DBConn.Where("username = ?", strings.ToLower(username)).First(&user).Error; err != nil {
 		return User{}, err
 	}
 
 	hash := hash{}
-	err := hash.compare(user.Password, password)
+	err := hash.comparePassword(c, user.Password, password)
 	if err != nil {
 		return User{}, err
 	}

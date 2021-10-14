@@ -1,8 +1,14 @@
 package book
 
-import "strconv"
+import (
+	"github.com/gofiber/fiber/v2"
+	"go.elastic.co/apm"
+	"strconv"
+)
 
-func getIDFromURLQuery(next, previous string, previousPage *bool) (int, error) {
+func getIDFromURLQuery(c *fiber.Ctx, next, previous string, previousPage *bool) (int, error) {
+	span, _ := apm.StartSpan(c.Context(), "getIDFromURLQuery", "utils")
+	defer span.End()
 	if previous != "" {
 		*previousPage = true
 		tempID, err := strconv.ParseInt(previous, 10, 32)

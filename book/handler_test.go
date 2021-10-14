@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	user "github.com/mrrizal/fiber-example/user"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/mrrizal/fiber-example/user"
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +21,7 @@ import (
 type bookServiceStructFake struct {
 }
 
-func (s *bookServiceStructFake) getBooks(id int, previousPage bool) ([]Book, error) {
+func (s *bookServiceStructFake) getBooks(c *fiber.Ctx, id int, previousPage bool) ([]Book, error) {
 	var books []Book
 	for i := 0; i < configs.Configs.PageSize; i++ {
 		var book Book
@@ -34,7 +35,7 @@ func (s *bookServiceStructFake) getBooks(id int, previousPage bool) ([]Book, err
 	return books, nil
 }
 
-func (s *bookServiceStructFake) getBook(id int) (Book, error) {
+func (s *bookServiceStructFake) getBook(c *fiber.Ctx, id int) (Book, error) {
 	var book Book
 	err := faker.FakeData(&book)
 	book.AuthorID = 1
@@ -44,11 +45,11 @@ func (s *bookServiceStructFake) getBook(id int) (Book, error) {
 	return book, nil
 }
 
-func (s *bookServiceStructFake) newBook(book *Book) error {
+func (s *bookServiceStructFake) newBook(c *fiber.Ctx, book *Book) error {
 	return nil
 }
 
-func (s *bookServiceStructFake) deleteBook(book *Book) error {
+func (s *bookServiceStructFake) deleteBook(c *fiber.Ctx, book *Book) error {
 	return nil
 }
 
@@ -127,7 +128,7 @@ func TestNewBookHandler(t *testing.T) {
 		testUser.ID = 1
 		testUser.Username = "test"
 
-		token, _ := user.GenerateJWTToken(testUser)
+		token, _ := user.GenerateJWTToken(&fiber.Ctx{}, testUser)
 		request := httptest.NewRequest(http.MethodPost, "/api/v1/book/", bytes.NewBuffer(requestBody))
 		request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 		request.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
@@ -153,7 +154,7 @@ func TestNewBookHandler(t *testing.T) {
 		testUser.ID = 1
 		testUser.Username = "test"
 
-		token, _ := user.GenerateJWTToken(testUser)
+		token, _ := user.GenerateJWTToken(&fiber.Ctx{}, testUser)
 		requestBody := []byte(`{"test": "test"}`)
 		request := httptest.NewRequest(http.MethodPost, "/api/v1/book/", bytes.NewBuffer(requestBody))
 		request.Header.Set("Content-Type", "application/json; charset=UTF-8")
@@ -192,7 +193,7 @@ func TestDeleteBookHandler(t *testing.T) {
 		testUser.ID = 1
 		testUser.Username = "test"
 
-		token, _ := user.GenerateJWTToken(testUser)
+		token, _ := user.GenerateJWTToken(&fiber.Ctx{}, testUser)
 		request := httptest.NewRequest(http.MethodDelete, "/api/v1/book/1", nil)
 		request.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
 		response, err := app.Test(request)
@@ -208,7 +209,7 @@ func TestDeleteBookHandler(t *testing.T) {
 		testUser.ID = 2
 		testUser.Username = "test"
 
-		token, _ := user.GenerateJWTToken(testUser)
+		token, _ := user.GenerateJWTToken(&fiber.Ctx{}, testUser)
 		request := httptest.NewRequest(http.MethodDelete, "/api/v1/book/1", nil)
 		request.Header.Set("Authorization", fmt.Sprintf("bearer %s", token))
 		response, err := app.Test(request)

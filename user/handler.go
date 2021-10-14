@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizal/fiber-example/utils"
 )
@@ -16,7 +17,7 @@ func SignUpHandler(c *fiber.Ctx, s Service) error {
 		return utils.ErrorResponse(c, 400, errors.New("password cannot be empty"))
 	}
 
-	if err := s.singUp(&user); err != nil {
+	if err := s.singUp(c, &user); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(201)
@@ -37,12 +38,12 @@ func LoginHandler(c *fiber.Ctx, s Service) error {
 		return utils.ErrorResponse(c, 400, errors.New("username and password is required"))
 	}
 
-	user, err := s.login(userCredentials.Username, userCredentials.Password)
+	user, err := s.login(c, userCredentials.Username, userCredentials.Password)
 	if err != nil {
 		return utils.ErrorResponse(c, 400, err)
 	}
 
-	token, err := GenerateJWTToken(user)
+	token, err := GenerateJWTToken(c, user)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
