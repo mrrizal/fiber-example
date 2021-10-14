@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/mrrizal/fiber-example/configs"
+	"go.elastic.co/apm"
 )
 
 type booksResponse struct {
@@ -13,6 +14,8 @@ type booksResponse struct {
 }
 
 func getNextURL(c *fiber.Ctx, books []Book) string {
+	span, _ := apm.StartSpan(c.Context(), "getNextURL", "parser")
+	defer span.End()
 	if len(books) == 0 || len(books) < configs.Configs.PageSize {
 		return ""
 	}
@@ -21,6 +24,8 @@ func getNextURL(c *fiber.Ctx, books []Book) string {
 }
 
 func getPreviousURL(c *fiber.Ctx, books []Book) string {
+	span, _ := apm.StartSpan(c.Context(), "getPreviousURL", "parser")
+	defer span.End()
 	if len(books) == 0 {
 		return ""
 	}
@@ -29,6 +34,8 @@ func getPreviousURL(c *fiber.Ctx, books []Book) string {
 }
 
 func booksToResponse(c *fiber.Ctx, books []Book) booksResponse {
+	span, _ := apm.StartSpan(c.Context(), "booksToResponse", "parser")
+	defer span.End()
 	resp := booksResponse{Results: books, Next: getNextURL(c, books), Previous: getPreviousURL(c, books)}
 	return resp
 }

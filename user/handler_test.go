@@ -18,9 +18,9 @@ import (
 type userServiceStructFake struct {
 }
 
-func (s *userServiceStructFake) singUp(user *User) error {
+func (s *userServiceStructFake) singUp(c *fiber.Ctx, user *User) error {
 	hash := hash{}
-	generatedPassword, err := hash.generate(user.Password)
+	generatedPassword, err := hash.generatePassword(c, user.Password)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (s *userServiceStructFake) singUp(user *User) error {
 	return nil
 }
 
-func (s *userServiceStructFake) login(username, password string) (User, error) {
+func (s *userServiceStructFake) login(c *fiber.Ctx, username, password string) (User, error) {
 	var user User
 	err := faker.FakeData(&user)
 	if err != nil {

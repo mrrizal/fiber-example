@@ -17,12 +17,12 @@ func GetBooksHandler(c *fiber.Ctx, s Service) error {
 	previous := c.Query("previous")
 	previousPage := false
 
-	id, err := getIDFromURLQuery(next, previous, &previousPage)
+	id, err := getIDFromURLQuery(c, next, previous, &previousPage)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	books, err := s.getBooks(id, previousPage)
+	books, err := s.getBooks(c, id, previousPage)
 	if err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
@@ -36,7 +36,7 @@ func GetBookHandler(c *fiber.Ctx, s Service) error {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	book, err := s.getBook(id)
+	book, err := s.getBook(c, id)
 	if err != nil {
 		return utils.ErrorResponse(c, 404, err)
 	}
@@ -56,7 +56,7 @@ func NewBookHandler(c *fiber.Ctx, s Service) error {
 	}
 
 	book.AuthorID = uint(authorID)
-	if err := s.newBook(book); err != nil {
+	if err := s.newBook(c, book); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
@@ -71,7 +71,7 @@ func DeleteBookHandler(c *fiber.Ctx, s Service) error {
 		return utils.ErrorResponse(c, 500, err)
 	}
 
-	if book, err = s.getBook(id); err != nil {
+	if book, err = s.getBook(c, id); err != nil {
 		return utils.ErrorResponse(c, 404, err)
 	}
 
@@ -84,7 +84,7 @@ func DeleteBookHandler(c *fiber.Ctx, s Service) error {
 		return utils.ErrorResponse(c, 403, errors.New("You don't have access to do this action."))
 	}
 
-	if err := s.deleteBook(&book); err != nil {
+	if err := s.deleteBook(c, &book); err != nil {
 		return utils.ErrorResponse(c, 500, err)
 	}
 	c.Status(204)
