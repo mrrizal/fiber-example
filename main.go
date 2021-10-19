@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -34,6 +35,7 @@ func main() {
 	loadEnvFile()
 
 	configs.GetSettings()
+	time.Sleep(3 * time.Second)
 	database.InitDatabase()
 
 	migrate := flag.Bool("migrate", false, "a bool")
