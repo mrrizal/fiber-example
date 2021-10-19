@@ -24,6 +24,7 @@ func InitDatabase() {
 
 	errConnect := errors.New("cant connect")
 	for i := 0; i < 5; i++ {
+		log.Info("trying connect to database.")
 		DBConn, err = gorm.Open(postgres.Open(u))
 		if err == nil {
 			errConnect = nil
